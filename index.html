@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact Form</title>
+    <style>
+      /* Basic styling */
+      body {
+        font-family: Arial, sans-serif;
+        margin: 2rem;
+      }
+      form {
+        max-width: 400px;
+        margin-bottom: 2rem;
+      }
+      input,
+      textarea,
+      button {
+        width: 100%;
+        padding: 0.5rem;
+        margin-top: 0.5rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 2rem;
+      }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 0.5rem;
+        text-align: left;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Contact Us</h1>
+    <form id="contactForm">
+      <label>Name</label>
+      <input type="text" name="Name" required />
+
+      <label>Email</label>
+      <input type="email" name="Email" required />
+
+      <label>Message</label>
+      <textarea name="Message" rows="4" required></textarea>
+
+      <button type="submit">Send</button>
+    </form>
+
+    <h2>Previous Submissions</h2>
+    <table id="submissionsTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Message</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <script>
+      // Replace with your Apps Script Web App URL
+      const SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbyGI7ym9-Szs9cj7SKi97HI0IiWnLIyrOge5oL9VUpyI2J5FhlXWSMKZaR6dsRhg6iD/exec";
+
+      // On form submit, POST data to Apps Script
+      document.getElementById("contactForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const data = {};
+        new FormData(form).forEach((v, k) => (data[k] = v));
+
+        fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify(data),
+        })
+          .then((res) => res.json())
+          .then(() => {
+            form.reset();
+            loadSubmissions();
+          })
+          .catch(console.error);
+      });
+
+      // Fetch and display all submissions
+      function loadSubmissions() {
+        fetch(SCRIPT_URL)
+          .then((res) => res.json())
+          .then((data) => {
+            const tbody = document.querySelector("#submissionsTable tbody");
+            tbody.innerHTML = "";
+            data.forEach((row) => {
+              const tr = document.createElement("tr");
+              tr.innerHTML = `
+              <td>${row.Name}</td>
+              <td>${row.Email}</td>
+              <td>${row.Message}</td>
+            `;
+              tbody.appendChild(tr);
+            });
+          })
+          .catch(console.error);
+      }
+
+      // Initial load
+      loadSubmissions();
+    </script>
+  </body>
+</html>
